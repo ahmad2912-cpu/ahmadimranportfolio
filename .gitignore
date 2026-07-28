@@ -1,0 +1,19 @@
+# Dependencies
+node_modules/
+client/node_modules/
+server/node_modules/
+
+# Production Build
+client/dist/
+client/build/
+
+# Environment Variables
+.env
+.env.local
+
+# Vercel
+.vercel/
+
+# OS & System Files
+.DS_Store
+Thumbs.db

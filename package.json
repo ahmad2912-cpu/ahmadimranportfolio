@@ -1,0 +1,16 @@
+{
+  "name": "ahmad-imran-mern-portfolio",
+  "version": "1.0.0",
+  "description": "Professional MERN Stack Portfolio Website for Ahmad Imran",
+  "main": "server/server.js",
+  "scripts": {
+    "start": "node server/server.js",
+    "server": "node server/server.js",
+    "client": "cmd /c \"cd client && npm run dev\"",
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "build": "cmd /c \"cd client && npm run build\""
+  },
+  "keywords": ["mern", "react", "express", "portfolio", "ahmad-imran", "software-engineer"],
+  "author": "Ahmad Imran",
+  "license": "ISC"
+}

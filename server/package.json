@@ -1,0 +1,16 @@
+{
+  "name": "portfolio-backend",
+  "version": "1.0.0",
+  "description": "Express & Node.js backend REST API for Ahmad Imran's Portfolio",
+  "main": "server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "mongoose": "^8.3.1"
+  }
+}

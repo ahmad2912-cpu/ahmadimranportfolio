@@ -1,0 +1,8 @@
+
+> ahmad-imran-mern-portfolio@1.0.0 server
+> node server/server.js
+
+====================================================
+ Ahmad Imran Portfolio MERN Server running on port 5000
+ REST API URL: http://localhost:5000/api/resume
+====================================================

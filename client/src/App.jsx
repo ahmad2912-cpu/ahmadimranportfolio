@@ -10,6 +10,7 @@ import AIAssistant from './components/AIAssistant';
 import Contact from './components/Contact';
 import Footer from './components/Footer';
 import ResumeModal from './components/ResumeModal';
+import { useTheme } from './hooks/useTheme';
 import { fetchResumeData } from './services/api';
 
 // Fallback CV Data
@@ -133,36 +134,26 @@ function App() {
   const [data, setData] = useState(fallbackData);
   const [selectedProject, setSelectedProject] = useState(null);
   const [resumeOpen, setResumeOpen] = useState(false);
-  const [theme, setTheme] = useState(() => {
-    return localStorage.getItem('theme') || 'dark';
-  });
+  const { theme, toggleTheme } = useTheme();
 
   useEffect(() => {
-    const root = document.documentElement;
-    if (theme === 'light') {
-      root.classList.add('light');
-    } else {
-      root.classList.remove('light');
+    // Force scroll to top on page load to prevent jumping to hash sections like #ai-assistant
+    window.scrollTo(0, 0);
+    if (window.location.hash) {
+      window.history.replaceState(null, '', window.location.pathname);
     }
-    localStorage.setItem('theme', theme);
-  }, [theme]);
-
-  useEffect(() => {
-    const loadData = async () => {
-      const serverData = await fetchResumeData();
-      if (serverData) {
-        setData(serverData);
-      }
-    };
-    loadData();
   }, []);
 
-  const toggleTheme = () => {
-    setTheme(prev => (prev === 'dark' ? 'light' : 'dark'));
+  const loadData = async () => {
+    const serverData = await fetchResumeData();
+    if (serverData) {
+      setData(serverData);
+    }
   };
+  useEffect(() => { loadData(); }, []);
 
   return (
-    <div className="min-h-screen bg-[var(--bg-main)] text-[var(--text-primary)] font-sans selection:bg-emerald-500 selection:text-slate-950 transition-colors duration-300">
+    <div className="min-h-screen bg-background text-primary font-sans selection:bg-accent selection:text-accent-contrast transition-colors duration-300">
       
       {/* Header */}
       <Navbar

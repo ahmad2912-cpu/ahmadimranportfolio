@@ -1,117 +1,314 @@
-import React, { useState, useEffect } from 'react';
-import { ArrowRight, Code, Database, Sparkles, Terminal, ShieldCheck, Mail, Cpu, CheckCircle2, Layers, Braces } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
+import {
+  motion,
+  AnimatePresence,
+  useReducedMotion,
+  useScroll,
+  useTransform,
+  useSpring
+} from 'framer-motion';
+import { ArrowRight, Terminal, Sparkles, CheckCircle2 } from 'lucide-react';
+
+const titles = [
+  'Full-Stack Web Apps',
+  'AI & Deep Learning',
+  'Scalable Backends',
+  'Modern Interfaces'
+];
+
+const EASE = [0.22, 1, 0.36, 1];
+
+/* ---------- Reusable entrance variants ---------- */
+
+const staggerContainer = {
+  hidden: {},
+  show: {
+    transition: { staggerChildren: 0.1, delayChildren: 0.15 }
+  }
+};
+
+const wordVariants = {
+  hidden: { opacity: 0, y: '0.7em', filter: 'blur(6px)' },
+  show: {
+    opacity: 1,
+    y: 0,
+    filter: 'blur(0px)',
+    transition: { duration: 0.6, ease: EASE }
+  }
+};
+
+const fadeSlide = {
+  hidden: { opacity: 0, y: 24 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: EASE } }
+};
+
+const simpleFade = {
+  hidden: { opacity: 0 },
+  show: { opacity: 1, transition: { duration: 0.4 } }
+};
+
+/* ---------- Theme-aware particle canvas ---------- */
+
+function ParticleField({ density = 42 }) {
+  const canvasRef = useRef(null);
+  const reduce = useReducedMotion() === true;
+
+  useEffect(() => {
+    if (reduce) return undefined;
+    const canvas = canvasRef.current;
+    if (!canvas) return undefined;
+    const ctx = canvas.getContext('2d');
+    let raf = 0;
+    let particles = [];
+
+    const readColor = () => {
+      const cs = getComputedStyle(document.documentElement);
+      return cs.getPropertyValue('--particle-color').trim() || 'rgba(148,163,184,0.5)';
+    };
+
+    const resize = () => {
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const { offsetWidth: w, offsetHeight: h } = canvas;
+      canvas.width = w * dpr;
+      canvas.height = h * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      const count = Math.min(density, Math.floor((w * h) / 14000));
+      particles = Array.from({ length: count }, () => ({
+        x: Math.random() * w,
+        y: Math.random() * h,
+        r: Math.random() * 1.7 + 0.5,
+        vx: (Math.random() - 0.5) * 0.28,
+        vy: (Math.random() - 0.5) * 0.28,
+        tw: Math.random() * Math.PI * 2
+      }));
+    };
+
+    const draw = (t) => {
+      const w = canvas.offsetWidth;
+      const h = canvas.offsetHeight;
+      ctx.clearRect(0, 0, w, h);
+      const color = readColor();
+      for (const p of particles) {
+        p.x += p.vx;
+        p.y += p.vy;
+        if (p.x < -12) p.x = w + 12;
+        else if (p.x > w + 12) p.x = -12;
+        if (p.y < -12) p.y = h + 12;
+        else if (p.y > h + 12) p.y = -12;
+        ctx.globalAlpha = 0.2 + 0.35 * Math.abs(Math.sin(p.tw + t / 900));
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+      raf = requestAnimationFrame(draw);
+    };
+
+    resize();
+    raf = requestAnimationFrame(draw);
+    window.addEventListener('resize', resize);
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener('resize', resize);
+    };
+  }, [reduce, density]);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      className="absolute inset-0 w-full h-full"
+      aria-hidden="true"
+    />
+  );
+}
+
+/* ---------- Hero ---------- */
 
 const Hero = ({ onOpenResume }) => {
   const [copied, setCopied] = useState(false);
   const [titleIndex, setTitleIndex] = useState(0);
+  const reduce = useReducedMotion() === true;
 
-  const titles = [
-    "Full-Stack MERN Engineer",
-    "AI & Deep Learning Specialist",
-    "Software Engineering Graduate",
-    "Laravel & Java Developer"
-  ];
+  const sectionRef = useRef(null);
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ['start start', 'end start']
+  });
+  const contentY = useSpring(useTransform(scrollYProgress, [0, 1], [0, reduce ? 0 : 90]), {
+    stiffness: 120,
+    damping: 30
+  });
+  const contentOpacity = useTransform(scrollYProgress, [0, 0.6], [1, 0.25]);
+  const orbScale = useTransform(scrollYProgress, [0, 1], [1, 1.15]);
 
   useEffect(() => {
+    if (reduce) return undefined;
     const interval = setInterval(() => {
       setTitleIndex((prev) => (prev + 1) % titles.length);
     }, 3000);
     return () => clearInterval(interval);
-  }, []);
+  }, [reduce]);
 
   const copyEmail = () => {
-    navigator.clipboard.writeText('ahmadimranmughal.2912@gmail.com');
+    navigator.clipboard
+      .writeText('ahmadimranmughal.2912@gmail.com')
+      .catch(() => {});
     setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    window.setTimeout(() => setCopied(false), 2000);
   };
 
+  const headingWords = ['I', 'build'];
+
   return (
-    <section className="relative pt-32 pb-20 md:pt-40 md:pb-28 overflow-hidden">
-      {/* Background Glowing Orbs */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[500px] h-[500px] bg-emerald-500/10 rounded-full blur-[140px] pointer-events-none animate-pulse-slow" />
-      <div className="absolute top-1/3 right-10 w-[400px] h-[400px] bg-cyan-500/10 rounded-full blur-[120px] pointer-events-none" />
+    <section
+      ref={sectionRef}
+      className="relative min-h-screen flex items-center pt-20 pb-20 overflow-hidden"
+    >
+      {/* ---- Layered theme-aware background ---- */}
+      <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
+        <div className="absolute inset-0 bg-gradient-to-b from-[color-mix(in_srgb,var(--accent)_6%,transparent)] via-transparent to-background" />
+        <div className="absolute inset-0 grid-overlay" />
+        <motion.div
+          style={{ scale: orbScale }}
+          className="absolute inset-0"
+        >
+          <motion.div
+            animate={reduce ? undefined : { x: [0, 40, 0], y: [0, -30, 0] }}
+            transition={{ duration: 22, repeat: Infinity, ease: 'easeInOut' }}
+            className="absolute -top-[18%] -left-[12%] w-[65vw] h-[65vw] rounded-full"
+            style={{ background: 'var(--orb-accent)' }}
+          />
+          <motion.div
+            animate={reduce ? undefined : { x: [0, -50, 0], y: [0, 35, 0] }}
+            transition={{ duration: 26, repeat: Infinity, ease: 'easeInOut' }}
+            className="absolute top-[15%] -right-[14%] w-[58vw] h-[58vw] rounded-full"
+            style={{ background: 'var(--orb-accent-2)' }}
+          />
+        </motion.div>
+        <ParticleField />
+        <div className="absolute inset-0 noise-overlay" />
+      </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-          
-          {/* Left Column: Headline & CTAs */}
-          <div className="lg:col-span-7 space-y-6 text-left">
-            
-            {/* Status Badge */}
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold tracking-wide">
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" />
+      {/* ---- Content ---- */}
+      <motion.div
+        style={{ y: contentY, opacity: contentOpacity }}
+        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full"
+      >
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
+          {/* ---- Left: headline & CTAs ---- */}
+          <motion.div
+            variants={staggerContainer}
+            initial="hidden"
+            animate="show"
+            className="lg:col-span-7 space-y-8 text-left"
+          >
+            {/* Status badge */}
+            <motion.div
+              variants={reduce ? simpleFade : fadeSlide}
+              whileHover={{ scale: 1.04 }}
+              className="inline-flex items-center gap-3 px-4 py-2 rounded-full glass-chip text-accent text-xs font-bold tracking-wide shadow-md"
+            >
+              <span className="relative flex w-2.5 h-2.5">
+                <span className="absolute inline-flex w-full h-full rounded-full bg-success opacity-60 animate-ping" />
+                <span className="relative inline-flex w-2.5 h-2.5 rounded-full bg-success" />
+              </span>
+              <Sparkles className="w-3.5 h-3.5" />
               <span>Software Developer Intern @ Star Automation</span>
-            </div>
+            </motion.div>
 
-            {/* Main Headline with Dynamic Typing Titles */}
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white tracking-tight leading-[1.15]">
-              Engineering Modern <br />
-              <span className="text-gradient-emerald">{titles[titleIndex]}</span>
+            {/* Headline: staggered words */}
+            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight leading-[1.08] font-display">
+              <span className="block overflow-hidden pb-1">
+                {headingWords.map((w, i) => (
+                  <motion.span
+                    key={i}
+                    variants={reduce ? simpleFade : wordVariants}
+                    className="inline-block text-primary will-change-transform"
+                  >
+                    {w}
+                    {i < headingWords.length - 1 && '\u00A0'}
+                  </motion.span>
+                ))}
+              </span>
+              <span className="block h-[1.15em] relative overflow-hidden mt-1">
+                <AnimatePresence mode="wait">
+                  <motion.span
+                    key={titleIndex}
+                    initial={reduce ? { opacity: 0 } : { y: '55%', opacity: 0, filter: 'blur(4px)' }}
+                    animate={{ y: 0, opacity: 1, filter: 'blur(0px)' }}
+                    exit={reduce ? { opacity: 0 } : { y: '-55%', opacity: 0, filter: 'blur(4px)' }}
+                    transition={{ duration: 0.5, ease: EASE }}
+                    className="absolute inline-block text-gradient-accent"
+                  >
+                    {titles[titleIndex]}
+                  </motion.span>
+                </AnimatePresence>
+              </span>
             </h1>
 
             {/* Subtitle */}
-            <p className="text-base sm:text-lg text-slate-300 font-normal leading-relaxed max-w-2xl">
-              Hi, I'm <strong className="text-white font-bold">Ahmad Imran</strong> — BS Software Engineering graduate (CGPA 3.14/4) from <span className="text-emerald-400 font-semibold">University of Central Punjab</span> with a Minor in Quality Assurance. I build scalable full-stack web applications with React, Node.js, Express, MongoDB, FastAPI, and Deep Learning models.
-            </p>
+            <motion.p
+              variants={reduce ? simpleFade : fadeSlide}
+              className="text-lg sm:text-xl text-secondary font-normal leading-relaxed max-w-2xl"
+            >
+              Hi, I&apos;m{' '}
+              <strong className="text-primary font-semibold">Ahmad Imran</strong>. I engineer
+              scalable web applications with React, Node.js, and Deep Learning models,
+              focusing on performance and premium user experiences.
+            </motion.p>
 
-            {/* Tech Badges */}
-            <div className="flex flex-wrap gap-2 pt-2">
-              {['React.js', 'Node.js', 'Express.js', 'MongoDB', 'FastAPI', 'Laravel', 'Java Spring', 'TensorFlow', 'REST APIs'].map((tech) => (
-                <span key={tech} className="px-3 py-1.5 rounded-lg bg-slate-800/90 border border-slate-700 text-slate-200 text-xs font-mono font-medium shadow-sm">
+            {/* Tech badges */}
+            <motion.div
+              variants={reduce ? simpleFade : fadeSlide}
+              className="flex flex-wrap gap-2 pt-2"
+            >
+              {['React.js', 'Node.js', 'Express', 'MongoDB', 'FastAPI', 'Python'].map((tech) => (
+                <span
+                  key={tech}
+                  className="px-3 py-1.5 rounded-lg glass-chip text-secondary text-xs font-mono font-medium hover:border-accent/60 hover:text-accent transition-colors cursor-default"
+                >
                   {tech}
                 </span>
               ))}
-            </div>
+            </motion.div>
 
-            {/* Action Buttons */}
-            <div className="flex flex-wrap items-center gap-4 pt-4">
-              <a
+            {/* CTAs */}
+            <motion.div
+              variants={reduce ? simpleFade : fadeSlide}
+              className="flex flex-wrap items-center gap-4 pt-6"
+            >
+              <motion.a
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
                 href="#projects"
-                className="glow-button inline-flex items-center gap-2 px-6 py-3.5 rounded-xl font-bold text-slate-950 text-sm shadow-xl"
+                className="glow-button inline-flex items-center gap-2 px-8 py-4 rounded-xl font-bold text-sm"
               >
-                <span>Explore Projects</span>
+                <span>View My Work</span>
                 <ArrowRight className="w-4 h-4" />
-              </a>
+              </motion.a>
 
-              <a
-                href="#contact"
-                className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-slate-800/90 text-white hover:bg-slate-700 border border-slate-700 font-semibold text-sm transition-all"
-              >
-                <Mail className="w-4 h-4 text-emerald-400" />
-                <span>Contact Me</span>
-              </a>
-
-              <button
+              <motion.button
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
                 onClick={onOpenResume}
-                className="inline-flex items-center gap-2 px-5 py-3.5 rounded-xl bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 border border-emerald-500/30 font-semibold text-sm transition-all"
+                className="inline-flex items-center gap-2 px-8 py-4 rounded-xl glass-panel text-secondary hover:text-accent border border-line hover:border-accent/60 font-semibold text-sm transition-all"
               >
                 <Terminal className="w-4 h-4" />
-                <span>View & Download CV</span>
-              </button>
-            </div>
+                <span>Download CV</span>
+              </motion.button>
+            </motion.div>
+          </motion.div>
 
-            {/* Quick Metrics */}
-            <div className="grid grid-cols-3 gap-4 pt-6 border-t border-white/10 max-w-xl">
-              <div>
-                <p className="text-2xl font-bold text-white">3.14 / 4.0</p>
-                <p className="text-xs text-slate-400 font-medium">CGPA (UCP Lahore)</p>
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-emerald-400">2 Internships</p>
-                <p className="text-xs text-slate-400 font-medium">Star Automation & SkimCode</p>
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-cyan-400">+15%</p>
-                <p className="text-xs text-slate-400 font-medium">Stability Improvement</p>
-              </div>
-            </div>
-
-          </div>
-
-          {/* Right Column: User Profile Photo with Animated Tech Orbit */}
-          <div className="lg:col-span-5 relative">
-            
-            <div className="glass-panel rounded-3xl p-6 border border-white/15 shadow-2xl animate-float relative overflow-hidden">
+          {/* ---- Right: profile card ---- */}
+          <motion.div
+            initial={reduce ? { opacity: 0 } : { opacity: 0, scale: 0.86, rotateY: -18 }}
+            animate={{ opacity: 1, scale: 1, rotateY: 0 }}
+            transition={{ duration: 0.9, delay: 0.35, ease: EASE }}
+            style={{ perspective: 1200 }}
+            className="lg:col-span-5 relative max-w-[340px] sm:max-w-md mx-auto lg:max-w-none mt-12 lg:mt-0 w-full"
+          >
+            <div className="glass-panel rounded-3xl p-6 border border-white/15 shadow-2xl relative overflow-hidden">
               
               {/* Top Bar */}
               <div className="flex items-center justify-between pb-4 border-b border-white/10 mb-6">
@@ -186,11 +383,30 @@ const Hero = ({ onOpenResume }) => {
               </div>
 
             </div>
-
-          </div>
-
+          </motion.div>
         </div>
-      </div>
+      </motion.div>
+
+      {/* ---- Scroll indicator ---- */}
+      {!reduce && (
+        <motion.a
+          href="#about"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 2, duration: 0.8 }}
+          className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-muted hover:text-accent transition-colors z-10"
+          aria-label="Scroll to about section"
+        >
+          <span className="text-[10px] font-mono uppercase tracking-[0.2em]">Scroll</span>
+          <div className="w-5 h-8 rounded-full border border-current flex justify-center pt-1.5">
+            <motion.span
+              animate={{ y: [0, 10, 0], opacity: [1, 0.2, 1] }}
+              transition={{ duration: 1.6, repeat: Infinity, ease: 'easeInOut' }}
+              className="w-1 h-1.5 rounded-full bg-current"
+            />
+          </div>
+        </motion.a>
+      )}
     </section>
   );
 };

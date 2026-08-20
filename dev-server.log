@@ -1,0 +1,6 @@
+
+> ahmad-imran-mern-portfolio@1.0.0 dev
+> concurrently "npm run server" "npm run client"
+
+'concurrently' is not recognized as an internal or external command,
+operable program or batch file.

@@ -67,19 +67,19 @@ const AIAssistant = () => {
           </p>
         </div>
 
-        {/* Chatbot Window */}
+          {/* Chatbot Window */}
         <div className="glass-panel rounded-2xl border border-white/10 overflow-hidden shadow-2xl">
           
           {/* Header Bar */}
           <div className="bg-slate-900/90 px-6 py-4 border-b border-white/10 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-purple-500 to-emerald-500 flex items-center justify-center text-slate-950 font-bold shadow-md shadow-purple-500/20">
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-purple-500 to-cyan-500 flex items-center justify-center text-slate-950 font-bold shadow-md shadow-purple-500/20">
                 <Bot className="w-5 h-5 stroke-[2.5]" />
               </div>
               <div>
                 <h3 className="text-sm font-bold text-white">Ahmad Imran Portfolio AI</h3>
-                <span className="text-[11px] text-emerald-400 font-mono flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                <span className="text-[11px] text-cyan-400 font-mono flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
                   REST API Active
                 </span>
               </div>
@@ -112,14 +112,14 @@ const AIAssistant = () => {
 
                 <div className={`p-4 rounded-2xl max-w-lg leading-relaxed ${
                   msg.sender === 'user'
-                    ? 'bg-emerald-500 text-slate-950 font-semibold rounded-tr-none shadow-md'
+                    ? 'bg-cyan-500 text-slate-950 font-semibold rounded-tr-none shadow-md'
                     : 'bg-slate-900/90 text-slate-100 border border-white/10 rounded-tl-none font-sans whitespace-pre-line'
                 }`}>
                   {msg.text}
                 </div>
 
                 {msg.sender === 'user' && (
-                  <div className="w-8 h-8 rounded-lg bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0">
+                  <div className="w-8 h-8 rounded-lg bg-cyan-500/20 border border-cyan-500/30 flex items-center justify-center text-cyan-400 shrink-0">
                     <User className="w-4 h-4" />
                   </div>
                 )}
@@ -145,7 +145,7 @@ const AIAssistant = () => {
               <button
                 key={idx}
                 onClick={() => { setInput(sp); }}
-                className="text-xs px-3 py-1 rounded-full bg-slate-800 text-slate-300 hover:text-emerald-400 hover:bg-slate-700 whitespace-nowrap transition-colors"
+                className="text-xs px-3 py-1 rounded-full bg-slate-800 text-slate-300 hover:text-cyan-400 hover:bg-slate-700 whitespace-nowrap transition-colors"
               >
                 {sp}
               </button>
@@ -159,12 +159,12 @@ const AIAssistant = () => {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Ask anything about Ahmad's projects, stack, or experience..."
-              className="flex-1 bg-slate-950 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition-colors"
+              className="flex-1 bg-slate-950 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 transition-colors"
             />
             <button
               type="submit"
               disabled={loading || !input.trim()}
-              className="px-5 py-3 rounded-xl bg-emerald-500 text-slate-950 font-bold hover:bg-emerald-400 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2"
+              className="px-5 py-3 rounded-xl bg-cyan-500 text-slate-950 font-bold hover:bg-cyan-400 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2"
             >
               <span>Send</span>
               <Send className="w-4 h-4" />
